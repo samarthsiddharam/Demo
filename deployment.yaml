@@ -1,5 +1,5 @@
 # ============================================================
-# Namespace (Optional but safe)
+# Namespace
 # ============================================================
 apiVersion: v1
 kind: Namespace
@@ -8,23 +8,7 @@ metadata:
 
 ---
 # ============================================================
-# PersistentVolumeClaim
-# ============================================================
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: "static-pvc"
-  namespace: "2401008"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-
----
-# ============================================================
-# Deployment
+# Deployment (NO PVC!)
 # ============================================================
 apiVersion: apps/v1
 kind: Deployment
@@ -48,13 +32,16 @@ spec:
           image: 127.0.0.1:30085/2401008_sam/static-site:latest
           ports:
             - containerPort: 80
-          volumeMounts:
-            - name: static-media
-              mountPath: /usr/share/nginx/html
-      volumes:
-        - name: static-media
-          persistentVolumeClaim:
-            claimName: "static-pvc"
+          # ❌ REMOVE THIS — no PVC mapping
+          # volumeMounts:
+          #   - name: static-media
+          #     mountPath: /usr/share/nginx/html
+
+      # ❌ REMOVE THIS ALSO — it hides all your HTML files
+      # volumes:
+      #   - name: static-media
+      #     persistentVolumeClaim:
+      #       claimName: "static-pvc"
 
 ---
 # ============================================================
@@ -97,5 +84,3 @@ spec:
                 name: static-site-service
                 port:
                   number: 80
-
-
