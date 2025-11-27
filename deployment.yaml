@@ -44,8 +44,8 @@ spec:
       imagePullSecrets:
         - name: nexus-secret
       containers:
-        - name: "static-site"
-          image: "nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest"
+        - name: static-site
+          image: 127.0.0.1:30085/2401008_sam/static-site:latest
           ports:
             - containerPort: 80
           volumeMounts:
@@ -97,4 +97,5 @@ spec:
                 name: static-site-service
                 port:
                   number: 80
+
 
