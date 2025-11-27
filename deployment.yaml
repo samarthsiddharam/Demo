@@ -1,10 +1,11 @@
 # ============================================================
-# Namespace (IMPORTANT — add this!!)
+# Namespace (Optional but safe)
 # ============================================================
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: 2401008
+  name: "2401008"
+
 ---
 # ============================================================
 # PersistentVolumeClaim
@@ -12,14 +13,15 @@ metadata:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: static-pvc
-  namespace: 2401008
+  name: "static-pvc"
+  namespace: "2401008"
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
+
 ---
 # ============================================================
 # Deployment
@@ -27,8 +29,8 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: static-site-deployment
-  namespace: 2401008
+  name: "static-site-deployment"
+  namespace: "2401008"
 spec:
   replicas: 1
   selector:
@@ -40,29 +42,20 @@ spec:
         app: static-site
     spec:
       imagePullSecrets:
-        - name: nexus-secret
+        - name: "nexus-secret"
       containers:
-        - name: static-site
-          image: nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
+        - name: "static-site"
+          image: "nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest"
           ports:
             - containerPort: 80
-
           volumeMounts:
             - name: static-media
               mountPath: /usr/share/nginx/html
-
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "256Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-
       volumes:
         - name: static-media
           persistentVolumeClaim:
-            claimName: static-pvc
+            claimName: "static-pvc"
+
 ---
 # ============================================================
 # Service
@@ -70,8 +63,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: static-site-service
-  namespace: 2401008
+  name: "static-site-service"
+  namespace: "2401008"
 spec:
   selector:
     app: static-site
@@ -79,6 +72,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+
 ---
 # ============================================================
 # Ingress
@@ -86,7 +80,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: static-site-ingress
+  name: "static-site-ingress"
   namespace: "2401008"
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -103,4 +97,3 @@ spec:
                 name: static-site-service
                 port:
                   number: 80
-
