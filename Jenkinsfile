@@ -123,13 +123,13 @@ spec:
         container('dind') {
             sh '''
                 docker tag static-site:latest \
-                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
+                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401008_sam/static-site:latest
 
                 docker push \
-                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
+                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401008_sam/static-site:latest
 
                 docker pull \
-                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
+                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/2401008_sam/static-site:latest
             '''
         }
     }
@@ -153,6 +153,7 @@ spec:
 
     }
 }
+
 
 
 
