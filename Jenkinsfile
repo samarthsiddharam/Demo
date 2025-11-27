@@ -13,7 +13,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/YOUR_USERNAME/YOUR_REPO.git', branch: 'main'
+                git url: 'https://github.com/samarthsiddharam/Demo.git', branch: 'main'
             }
         }
 
@@ -51,3 +51,4 @@ pipeline {
         }
     }
 }
+
