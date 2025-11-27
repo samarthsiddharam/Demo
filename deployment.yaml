@@ -87,7 +87,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: static-site-ingress
-  namespace: 2401008
+  namespace: "2401008"
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -103,3 +103,4 @@ spec:
                 name: static-site-service
                 port:
                   number: 80
+
