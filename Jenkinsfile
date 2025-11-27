@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'sonar'
+        SONARQUBE = 'sonar-08'
         NEXUS_REGISTRY = 'nexus.imcc.com:8083'
         IMAGE_NAME = 'static-site'
         K8S_DEPLOYMENT = 'deployment.yaml'
@@ -51,4 +51,5 @@ pipeline {
         }
     }
 }
+
 
