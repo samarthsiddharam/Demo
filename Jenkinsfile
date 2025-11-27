@@ -1,55 +1,144 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
 
-    environment {
-        SONARQUBE = 'sonar'
-        NEXUS_REGISTRY = 'nexus.imcc.com:8083'
-        IMAGE_NAME = 'static-site'
-        K8S_DEPLOYMENT = 'deployment.yaml'
-        K8S_SERVICE = 'service.yaml'
+  # Sonar Scanner Container
+  - name: sonar-scanner
+    image: sonarsource/sonar-scanner-cli
+    command: [ "cat" ]
+    tty: true
+
+  # Docker-in-Docker Container
+  - name: dind
+    image: docker:dind
+    securityContext:
+      privileged: true
+    env:
+    - name: DOCKER_TLS_CERTDIR
+      value: ""
+    volumeMounts:
+    - name: docker-config
+      mountPath: /etc/docker/daemon.json
+      subPath: daemon.json
+
+  # kubectl Container
+  - name: kubectl
+    image: bitnami/kubectl:latest
+    command: [ "cat" ]
+    tty: true
+    securityContext:
+      runAsUser: 0
+      readOnlyRootFilesystem: false
+    env:
+    - name: KUBECONFIG
+      value: /kube/config
+    volumeMounts:
+    - name: kubeconfig-secret
+      mountPath: /kube/config
+      subPath: kubeconfig
+
+  volumes:
+  - name: docker-config
+    configMap:
+      name: docker-daemon-config
+  - name: kubeconfig-secret
+    secret:
+      secretName: kubeconfig-secret
+'''
+        }
     }
 
     stages {
 
+        /* ----------------------
+            Checkout
+        ---------------------- */
         stage('Checkout Code') {
             steps {
-                git url: 'https://github.com/samarthsiddharam/Demo.git', branch: 'main'
+                container('kubectl') {
+                    git url: 'https://github.com/samarthsiddharam/Demo.git', branch: 'main'
+                }
             }
         }
 
-        stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('sonar') {
-            sh """
-                ${tool 'sonar-scanner'}/bin/sonar-scanner
-            """
-        }
-    }
-}
-
-
+        /* ----------------------
+            Build Docker Image
+        ---------------------- */
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${NEXUS_REGISTRY}/${IMAGE_NAME}:latest ."
+                container('dind') {
+                    sh '''
+                        sleep 10
+                        docker build -t static-site:latest .
+                        docker image ls
+                    '''
+                }
             }
         }
 
-        stage('Login to Nexus Docker Registry') {
+        /* ----------------------
+            SonarQube Analysis
+        ---------------------- */
+        stage('SonarQube Analysis') {
             steps {
-                sh "docker login ${NEXUS_REGISTRY} -u student -p Imcc@2025"
+                container('sonar-scanner') {
+                    withCredentials([string(credentialsId: 'jenkins-token-08', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                            sonar-scanner \
+                              -Dsonar.projectKey=2401008_sam \
+                              -Dsonar.sources=. \
+                              -Dsonar.host.url=http://sonarqube.imcc.com \
+                              -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
+                }
             }
         }
 
+        /* ----------------------
+            Login to Nexus
+        ---------------------- */
+        stage('Login to Nexus Registry') {
+            steps {
+                container('dind') {
+                    sh '''
+                        docker login nexus.imcc.com:8083 -u student -p Imcc@2025
+                    '''
+                }
+            }
+        }
+
+        /* ----------------------
+            Push Image
+        ---------------------- */
         stage('Push Docker Image') {
             steps {
-                sh "docker push ${NEXUS_REGISTRY}/${IMAGE_NAME}:latest"
+                container('dind') {
+                    sh '''
+                        docker tag static-site:latest nexus.imcc.com:8083/static-site:latest
+                        docker push nexus.imcc.com:8083/static-site:latest
+                        docker pull nexus.imcc.com:8083/static-site:latest
+                    '''
+                }
             }
         }
 
+        /* ----------------------
+            Deploy to Kubernetes
+        ---------------------- */
         stage('Deploy to Kubernetes') {
             steps {
-                sh "kubectl apply -f ${K8S_DEPLOYMENT}"
-                sh "kubectl apply -f ${K8S_SERVICE}"
+                container('kubectl') {
+                    sh '''
+                        kubectl apply -f deployment.yaml
+                        kubectl apply -f service.yaml
+                    '''
+                }
             }
         }
     }
