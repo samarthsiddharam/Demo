@@ -19,24 +19,24 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonar') {
-                    sh """
-                        ${tool 'sonar-scanner'}/bin/sonar-scanner
-                    """
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv('sonar') {
+        //             sh """
+        //                 ${tool 'sonar-scanner'}/bin/sonar-scanner
+        //             """
+        //         }
+        //     }
+        // }
 
-        stage('Build Docker Image') {
-            steps {
-                sh """
-                    echo "Building Docker image..."
-                    docker build -t ${NEXUS_REGISTRY}/${IMAGE_NAME}:latest .
-                """
-            }
-        }
+        // stage('Build Docker Image') {
+        //     steps {
+        //         sh """
+        //             echo "Building Docker image..."
+        //             docker build -t ${NEXUS_REGISTRY}/${IMAGE_NAME}:latest .
+        //         """
+        //     }
+        // }
 
         stage('Login to Nexus Docker Registry') {
             steps {
@@ -67,3 +67,4 @@ pipeline {
         }
     }
 }
+
