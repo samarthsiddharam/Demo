@@ -92,7 +92,7 @@ spec:
                             sonar-scanner \
                               -Dsonar.projectKey=2401008_sam \
                               -Dsonar.sources=. \
-                              -Dsonar.host.url=http://sonarqube.imcc.com \
+                              -Dsonar.host.url=http://my-sonarqube-sonarqube.sonarqube.svc.cluster.local:9000 \
                               -Dsonar.login=$SONAR_TOKEN
                         '''
                     }
@@ -143,3 +143,4 @@ spec:
         }
     }
 }
+
