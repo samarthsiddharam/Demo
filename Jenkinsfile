@@ -104,37 +104,37 @@ spec:
             Login to Nexus
         ---------------------- */
         stage('Login to Nexus Registry') {
-            steps {
-                container('dind') {
-                    sh '''
-                        docker login nexus.imcc.com:8083 -u student -p Imcc@2025
-                    '''
-                }
-            }
+    steps {
+        container('dind') {
+            sh '''
+                docker login nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085 \
+                    -u student -p Imcc@2025
+            '''
         }
+    }
+}
+
 
         /* ----------------------
             Push Image
         ---------------------- */
-        stage('Push Docker Image') {
+       stage('Push Docker Image') {
     steps {
         container('dind') {
             sh '''
-                # Tag image for internal Nexus registry
                 docker tag static-site:latest \
                 nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
 
-                # Push image to Nexus internal registry
                 docker push \
                 nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
 
-                # Pull image back to verify
                 docker pull \
                 nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
             '''
         }
     }
 }
+
 
 
         /* ----------------------
@@ -152,5 +152,6 @@ spec:
         }
     }
 }
+
 
 
