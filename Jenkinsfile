@@ -141,17 +141,19 @@ spec:
             Deploy to Kubernetes
         ---------------------- */
         stage('Deploy to Kubernetes') {
-            steps {
-                container('kubectl') {
-                    sh '''
-                        kubectl apply -f deployment.yaml
-                        kubectl apply -f service.yaml
-                    '''
-                }
-            }
+    steps {
+        container('kubectl') {
+            sh '''
+                kubectl create namespace 2401008 --dry-run=client -o yaml | kubectl apply -f -
+                kubectl apply -f deployment.yaml -n 2401008
+            '''
         }
     }
 }
+
+    }
+}
+
 
 
 
