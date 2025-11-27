@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+  <div class="welcome-container">
+    <h2 id="welcomeMessage" class="welcome-animation"></h2>
+    <button onclick="logout()">Logout</button>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    const user = sessionStorage.getItem('loggedInUser');
+    if (!user) {
+      window.location.href = 'index.html';
+    } else {
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      welcomeMessage.textContent = `Welcome, ${user}!`;
+      welcomeMessage.classList.add('animate');
+    }
+  </script>
+</body>
+</html>
