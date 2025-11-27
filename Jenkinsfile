@@ -117,16 +117,25 @@ spec:
             Push Image
         ---------------------- */
         stage('Push Docker Image') {
-            steps {
-                container('dind') {
-                    sh '''
-                        docker tag static-site:latest nexus.imcc.com:8083/static-site:latest
-                        docker push nexus.imcc.com:8083/static-site:latest
-                        docker pull nexus.imcc.com:8083/static-site:latest
-                    '''
-                }
-            }
+    steps {
+        container('dind') {
+            sh '''
+                # Tag image for internal Nexus registry
+                docker tag static-site:latest \
+                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
+
+                # Push image to Nexus internal registry
+                docker push \
+                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
+
+                # Pull image back to verify
+                docker pull \
+                nexus-service-for-docker-hosted-registry.nexus.svc.cluster.local:8085/static-site:latest
+            '''
         }
+    }
+}
+
 
         /* ----------------------
             Deploy to Kubernetes
@@ -143,4 +152,5 @@ spec:
         }
     }
 }
+
 
